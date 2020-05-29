@@ -6,6 +6,7 @@ import { IndexBuffer } from '../gl/IndexBuffer';
 import basic_shader from '../shaders/basic';
 import { Renderer } from '../gl/Renderer';
 import { Texture2D } from '../gl/Texture2D';
+import { FrameBuffer } from '../gl/FrameBuffer';
 
 export class App {
     constructor(gl) {
@@ -19,10 +20,10 @@ export class App {
         this.shader.add_uniform('uDataTexture', new Uniform(loc => gl.uniform1i(loc, 0)));
 
         let rect_data = new Float32Array([
-            0, 0, 
-            0, 1,
-            1, 0,
-            1, 1
+            -1, -1, 
+            -1,  1,
+             1, -1,
+             1,  1
         ]);
 
         let index_data = new Uint32Array([
@@ -47,12 +48,18 @@ export class App {
 
         this.shape = [100, 100];
         this.data = new Uint8Array(this.shape[0]*this.shape[1]);
+        this.randomise_data();
 
+
+        this.data_texture = new Texture2D(gl, this.data, this.shape);
+        this.frame_buffer = new FrameBuffer(gl);
+        this.frame_buffer.attach_texture2D(this.data_texture);
+    }
+
+    randomise_data() {
         for (let i = 0; i < this.data.length; i++) {
             this.data[i] = (Math.random() > 0.5) ? 255 : 0;
         }
-
-        this.data_texture = new Texture2D(gl, this.data, this.shape);
     }
 
     run() {
@@ -60,16 +67,32 @@ export class App {
     }
 
     loop() {
+        this.on_update();
         this.on_render();
         requestAnimationFrame(this.loop.bind(this));
     }
 
+    on_update() {
+        this.randomise_data();
+    }
+
     on_render() {
         let gl = this.gl;
+        // this.frame_buffer.bind();
+        // this.data_texture.bind();
+        // // gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+        // // gl.viewport(0, 0, 800, 800);
+        // gl.drawBuffers([gl.COLOR_ATTACHMENT0]);
+        // // // gl.drawPixels(this.shape[0], this.shape[1], gl.UNSIGNED_BYTE, this.data);
+        // this.frame_buffer.unbind();
+
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, this.shape[0], this.shape[1], gl.RED, gl.UNSIGNED_BYTE, this.data);
+
+
         this.shader.bind();
         this.vao.bind();
         this.ibo.bind();
-        this.data_texture.bind(0);
+        this.data_texture.active(0);
 
         this.renderer.clear();
         this.renderer.draw(this.vao, this.ibo, this.shader);
