@@ -91,18 +91,18 @@ export class QuadTreeNode {
         if (x >= offset) {
             // nw
             if (y < offset) {
-                return this.nw.get(x-offset, y);
+                return this.ne.get(x-offset, y);
             // sw
             } else {
-                return this.sw.get(x-offset, y-offset);
+                return this.se.get(x-offset, y-offset);
             }
         } else {
             // ne
             if (y < offset) {
-                return this.ne.get(x, y);
+                return this.nw.get(x, y);
             // se
             } else {
-                return this.se.get(x, y-offset);
+                return this.sw.get(x, y-offset);
             }
         }
     }

@@ -38,7 +38,7 @@ export class App {
         this.vao = new VertexArrayObject(gl);
         this.vao.add_vertex_buffer(this.vbo, layout);
 
-        this.sim = new Simulation(4);
+        this.sim = new Simulation(6);
         this.sim.randomise();
         this.sim.update_buffer();
 
@@ -59,6 +59,7 @@ export class App {
     }
 
     on_update() {
+        this.step();
         if (this.steps > 0) {
             this.step();
             this.steps -= 1;

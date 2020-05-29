@@ -23,7 +23,7 @@ class HashMap {
 
 export class HashLifeNode extends QuadTreeSimulated {
     static HashedNodes = new HashMap();
-    static CurrentID = 4000;
+    static CurrentID = 101;
 
     constructor(nw, ne, sw, se) {
         super(nw, ne, sw, se);
@@ -50,7 +50,7 @@ export class HashLifeNode extends QuadTreeSimulated {
             return this.population;
         } 
         return this.nw.address +
-            163 * this.ne.address + 
+            11 * this.ne.address + 
             101 * this.sw.address +
             1007 * this.se.address;
     }
@@ -58,7 +58,7 @@ export class HashLifeNode extends QuadTreeSimulated {
     // get random number
     static generate_id() {
         let id = HashLifeNode.CurrentID;
-        HashLifeNode.CurrentID += 1000;
+        HashLifeNode.CurrentID += 7;
         return id;
     }
 

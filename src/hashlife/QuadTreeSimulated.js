@@ -6,6 +6,10 @@ export class QuadTreeSimulated extends QuadTreeNode {
         this.result = null;
     }
 
+    create(nw, ne, sw, se) {
+        return new QuadTreeSimulated(nw, ne, sw, se);
+    }
+
     static create(level, alive) {
         return QuadTreeNode.create(level, alive);
     }
@@ -30,7 +34,7 @@ export class QuadTreeSimulated extends QuadTreeNode {
         return this.create(north.sw, north.se, south.nw, south.ne);
     }
 
-    create_sub_sub_center() {
+    create_center() {
         return this.create(this.nw.se, this.ne.sw, this.sw.ne, this.se.nw);
     }
 
@@ -83,17 +87,17 @@ export class QuadTreeSimulated extends QuadTreeNode {
         // 0 x x x
         // 1 x x x
         // 2 x x x
-        let n00 = this.nw.get_next_generation(); 
-        let n01 = this.create_horizontal(this.nw, this.ne).get_next_generation();
-        let n02 = this.ne.get_next_generation(); 
+        let n00 = this.nw.create_center(); 
+        let n01 = this.create_horizontal(this.nw, this.ne).create_center();
+        let n02 = this.ne.create_center(); 
 
-        let n10 = this.create_vertical(this.nw, this.sw).get_next_generation(); 
-        let n11 = this.create_sub_sub_center().get_next_generation();
-        let n12 = this.create_vertical(this.ne, this.se).get_next_generation(); 
+        let n10 = this.create_vertical(this.nw, this.sw).create_center(); 
+        let n11 = this.create_center().create_center();
+        let n12 = this.create_vertical(this.ne, this.se).create_center(); 
 
-        let n20 = this.sw.get_next_generation(); 
-        let n21 = this.create_horizontal(this.sw, this.se).get_next_generation();
-        let n22 = this.se.get_next_generation(); 
+        let n20 = this.sw.create_center(); 
+        let n21 = this.create_horizontal(this.sw, this.se).create_center();
+        let n22 = this.se.create_center(); 
 
         // quads from these
         let nw = this.create(n00, n01, n10, n11).get_next_generation();
@@ -112,10 +116,10 @@ export class QuadTreeSimulated extends QuadTreeNode {
     // this would be (x, y) = (2, 2)
     //      0  1  2  3
     //   | -----------
-    // 0 | 15 11  7  3  
-    // 1 | 14 10  6  2  
-    // 2 | 13  9  5  1
-    // 3 | 12  8  4  0
+    // 0 |  0  1  2  3  
+    // 1 |  4  5  6  7
+    // 2 |  8  9 10 11
+    // 3 | 12 13 14 15
     // we only consider centre (2x2)
     // this would be bits 10, 9, 6, 5
     slow_simulation() {
@@ -123,14 +127,17 @@ export class QuadTreeSimulated extends QuadTreeNode {
         // store the 4x4 data inside a 16bit value
         for (let x = 0; x < 4; x++) {
             for (let y = 0; y < 4; y++) {
-                bits = (bits << 1) + this.get(x, y);
+                // bits = (bits << 1) + this.get(x, y);
+                bits |= this.get(x, y) << (x + y*4);
             }
         }
-        let nw = this.create(this.one_generation(bits >> 5)); // bit 10
-        let ne = this.create(this.one_generation(bits >> 4)); // bit 9
-        let sw = this.create(this.one_generation(bits >> 1)); // bit 6
-        let se = this.create(this.one_generation(bits));      // bit 5
+        // debug_out(bits);
+        let nw = this.create(this.one_generation(bits >> 0)); // bit 10
+        let ne = this.create(this.one_generation(bits >> 1)); // bit 9
+        let sw = this.create(this.one_generation(bits >> 4)); // bit 6
+        let se = this.create(this.one_generation(bits >> 5)); // bit 5
         let res = this.create(nw, ne, sw, se);
+        // debug_2x2(res);
         return res;
     }
 
@@ -163,6 +170,38 @@ export class QuadTreeSimulated extends QuadTreeNode {
             return 0;
         }
     }
+}
+
+function debug_out(bits) {
+    // store the 4x4 data inside a 16bit value
+    let c = [];
+    for (let y = 0; y < 4; y++) {
+        let r = [];
+        for (let x = 0; x < 4; x++) {
+            // bits = (bits << 1) + this.get(x, y);
+            if (bits & (1 << (x + y*4))) {
+                r.push(1);
+            } else {
+                r.push(0);
+            }
+        }
+        c.push(r.join(','));
+    }
+    console.log(c.join('\n'));
+}
+
+function debug_2x2(node) {
+    let c = [];
+    let r = [];
+    r.push(node.nw.population);
+    r.push(node.ne.population);
+    c.push(r.join(','));
+
+    r = [];
+    r.push(node.sw.population);
+    r.push(node.se.population);
+    c.push(r.join(','));
+    console.log(c.join('\n'));
 }
 
 

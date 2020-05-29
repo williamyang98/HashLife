@@ -28,13 +28,18 @@ export class Simulation {
                 }
             }
         }
+
+        // for (let y = 3; y < 6; y++) {
+        //     this.root = this.root.set(4, y, 1);
+        // }
     }
 
     step() {
         while (true) {
             let root = this.root;
             let [nw, ne, sw, se] = [root.nw, root.ne, root.sw, root.se];
-            if (nw.population !== nw.se.se.population ||
+            if (root.level < 3 ||
+                nw.population !== nw.se.se.population ||
                 ne.population !== ne.sw.sw.population ||
                 sw.population !== sw.ne.ne.population ||
                 se.population !== se.nw.nw.population)
@@ -45,7 +50,6 @@ export class Simulation {
             }
         }
         this.root = this.root.get_next_generation();
-        this.root = this.root.expand();
         this.update_buffer();
     }
 
@@ -56,7 +60,7 @@ export class Simulation {
 
     draw_recursive(node, xoff, yoff) {
         if (node.level === 0) {
-            this.buffer[xoff*this.shape[0] + yoff] = node.population ? 255 : 0;
+            this.buffer[xoff + yoff*this.shape[0]] = node.population ? 0 : 255;
             return;
         }
         let offset = 1 << (node.level-1);
