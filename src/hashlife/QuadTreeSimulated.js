@@ -36,6 +36,10 @@ export class QuadTreeSimulated extends QuadTreeNode {
 
     // current node can only determine centered subnode 1 level down
     get_next_generation() {
+        // if result cached, just send
+        if (this.result !== null) {
+            return this.result;
+        }
         // empty then ignore
         if (this.population === 0) {
             this.result = this.nw;
@@ -83,17 +87,17 @@ export class QuadTreeSimulated extends QuadTreeNode {
         // 0 x x x
         // 1 x x x
         // 2 x x x
-        let n00 = this.nw.create_center(); 
-        let n01 = this.create_horizontal(this.nw, this.ne).create_center();
-        let n02 = this.ne.create_center(); 
+        let n00 = this.nw.get_next_generation(); 
+        let n01 = this.create_horizontal(this.nw, this.ne).get_next_generation();
+        let n02 = this.ne.get_next_generation(); 
 
-        let n10 = this.create_vertical(this.nw, this.sw).create_center(); 
-        let n11 = this.create_center().create_center();
-        let n12 = this.create_vertical(this.ne, this.se).create_center(); 
+        let n10 = this.create_vertical(this.nw, this.sw).get_next_generation(); 
+        let n11 = this.create_center().get_next_generation();
+        let n12 = this.create_vertical(this.ne, this.se).get_next_generation(); 
 
-        let n20 = this.sw.create_center(); 
-        let n21 = this.create_horizontal(this.sw, this.se).create_center();
-        let n22 = this.se.create_center(); 
+        let n20 = this.sw.get_next_generation(); 
+        let n21 = this.create_horizontal(this.sw, this.se).get_next_generation();
+        let n22 = this.se.get_next_generation(); 
 
         // quads from these
         let nw = this.create(n00, n01, n10, n11).get_next_generation();

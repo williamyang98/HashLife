@@ -31,22 +31,33 @@ export class Simulation {
     }
 
     step() {
-        // while (true) {
-        //     let root = this.root;
-        //     let [nw, ne, sw, se] = [root.nw, root.ne, root.sw, root.se];
-        //     if (root.level < 3 ||
-        //         nw.population !== nw.se.se.population ||
-        //         ne.population !== ne.sw.sw.population ||
-        //         sw.population !== sw.ne.ne.population ||
-        //         se.population !== se.nw.nw.population)
-        //     {
-        //         this.root = this.root.expand();
-        //     } else {
-        //         break;
-        //     }
-        // }
-        // this.root = this.root.get_next_generation();
+        if (this.root.level >= 9) {
+            this.wrapped_step();
+        } else {
+            this.expanding_step(); 
+        }
+        this.update_buffer();
+    }
 
+    expanding_step() {
+        while (true) {
+            let root = this.root;
+            let [nw, ne, sw, se] = [root.nw, root.ne, root.sw, root.se];
+            if (root.level < 3 ||
+                nw.population !== nw.se.se.population ||
+                ne.population !== ne.sw.sw.population ||
+                sw.population !== sw.ne.ne.population ||
+                se.population !== se.nw.nw.population)
+            {
+                this.root = this.root.expand();
+            } else {
+                break;
+            }
+        }
+        this.root = this.root.get_next_generation();
+    }
+
+    wrapped_step() {
         let orig = this.root;
         let center = this.root.get_next_generation();
         let horizontal = orig.create(orig.ne, orig.nw, orig.se, orig.sw).get_next_generation();
@@ -60,8 +71,6 @@ export class Simulation {
 
         let root = orig.create(nw, ne, sw, se);
         this.root = root;
-
-        this.update_buffer();
     }
 
     update_buffer() {
