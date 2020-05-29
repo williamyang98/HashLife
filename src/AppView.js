@@ -23,6 +23,12 @@ export class AppView extends React.Component {
     this.app = app;
   }  
 
+  step() {
+    if (this.app !== undefined) {
+      this.app.steps = 1;
+    }
+  }
+
   render() {
     if (this.state.failed_webgl) {
       return <div>Requires WebGL2 Support</div>
@@ -30,7 +36,7 @@ export class AppView extends React.Component {
 
     return (
       <div>
-        <div>Test</div>
+        <button onClick={ev => this.step()}>Step</button>
         <canvas width={800} height={800} ref={this.ref}></canvas>
       </div>
     );

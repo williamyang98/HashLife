@@ -6,6 +6,7 @@ import { IndexBuffer } from '../gl/IndexBuffer';
 import basic_shader from '../shaders/basic';
 import { Renderer } from '../gl/Renderer';
 import { GridRender } from './GridRender';
+import { Simulation } from '../hashlife/Simulation';
 
 const quad = {
     vertex_data: new Float32Array([
@@ -37,8 +38,13 @@ export class App {
         this.vao = new VertexArrayObject(gl);
         this.vao.add_vertex_buffer(this.vbo, layout);
 
-        this.grid = new GridRender(gl, [100, 100]);
-        this.grid.randomise();
+        this.sim = new Simulation(4);
+        this.sim.randomise();
+        this.sim.update_buffer();
+
+        this.grid = new GridRender(gl, this.sim.buffer, this.sim.shape);
+
+        this.steps = 0;
     }
 
 
@@ -53,8 +59,20 @@ export class App {
     }
 
     on_update() {
-        this.grid.randomise();
-        this.grid.refresh();
+        if (this.steps > 0) {
+            this.step();
+            this.steps -= 1;
+        }
+    }
+
+    step() {
+        this.sim.step();
+        this.sim.update_buffer();
+        if (this.sim.buffer !== this.grid.data) {
+            this.grid = new GridRender(this.gl, this.sim.buffer, this.sim.shape);
+        } else {
+            this.grid.refresh();
+        }
     }
 
     on_render() {
