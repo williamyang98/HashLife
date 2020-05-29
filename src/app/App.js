@@ -38,7 +38,7 @@ export class App {
         this.vao = new VertexArrayObject(gl);
         this.vao.add_vertex_buffer(this.vbo, layout);
 
-        this.sim = new Simulation(6);
+        this.sim = new Simulation(8);
         this.sim.randomise();
         this.sim.update_buffer();
 

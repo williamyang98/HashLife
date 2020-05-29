@@ -28,28 +28,39 @@ export class Simulation {
                 }
             }
         }
-
-        // for (let y = 3; y < 6; y++) {
-        //     this.root = this.root.set(4, y, 1);
-        // }
     }
 
     step() {
-        while (true) {
-            let root = this.root;
-            let [nw, ne, sw, se] = [root.nw, root.ne, root.sw, root.se];
-            if (root.level < 3 ||
-                nw.population !== nw.se.se.population ||
-                ne.population !== ne.sw.sw.population ||
-                sw.population !== sw.ne.ne.population ||
-                se.population !== se.nw.nw.population)
-            {
-                this.root = this.root.expand();
-            } else {
-                break;
-            }
-        }
-        this.root = this.root.get_next_generation();
+        // while (true) {
+        //     let root = this.root;
+        //     let [nw, ne, sw, se] = [root.nw, root.ne, root.sw, root.se];
+        //     if (root.level < 3 ||
+        //         nw.population !== nw.se.se.population ||
+        //         ne.population !== ne.sw.sw.population ||
+        //         sw.population !== sw.ne.ne.population ||
+        //         se.population !== se.nw.nw.population)
+        //     {
+        //         this.root = this.root.expand();
+        //     } else {
+        //         break;
+        //     }
+        // }
+        // this.root = this.root.get_next_generation();
+
+        let orig = this.root;
+        let center = this.root.get_next_generation();
+        let horizontal = orig.create(orig.ne, orig.nw, orig.se, orig.sw).get_next_generation();
+        let vertical = orig.create(orig.sw, orig.se, orig.nw, orig.ne).get_next_generation();
+        let corner = orig.create(orig.se, orig.sw, orig.ne, orig.nw).get_next_generation();
+
+        let nw = orig.create(corner.se, vertical.sw, horizontal.ne, center.nw);
+        let ne = orig.create(vertical.se, corner.sw, center.ne, horizontal.nw);
+        let sw = orig.create(horizontal.se, center.sw, corner.ne, vertical.nw);
+        let se = orig.create(center.se, horizontal.sw, vertical.ne, corner.nw);
+
+        let root = orig.create(nw, ne, sw, se);
+        this.root = root;
+
         this.update_buffer();
     }
 

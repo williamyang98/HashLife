@@ -10,10 +10,6 @@ export class QuadTreeSimulated extends QuadTreeNode {
         return new QuadTreeSimulated(nw, ne, sw, se);
     }
 
-    static create(level, alive) {
-        return QuadTreeNode.create(level, alive);
-    }
-
     create_horizontal(west, east) {
         //  1 1 1 1 2 2 2 2
         //  1 1 1 1 2 2 2 2
