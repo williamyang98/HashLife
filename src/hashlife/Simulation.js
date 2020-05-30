@@ -8,47 +8,106 @@ export class Simulation {
     }
 
     construct_buffer() {
-        if (this.root.level === this.current_level) {
-            return;
-        }
-        this.current_level = this.root.level;
-        let dim = (1 << this.root.level);
-        this.shape = [dim, dim];
-        this.count = dim*dim; 
+        // if (this.root.level === this.current_level) {
+        //     return;
+        // }
+        // this.current_level = this.root.level;
+        // let dim = (1 << this.root.level);
+        // this.shape = [dim, dim];
+        // this.count = dim*dim; 
+        // this.buffer = new Uint8Array(this.count);
+        // this.shape = [8, 8];
+        this.shape = [1024, 1024];
+        this.count = this.shape[0] * this.shape[1];
         this.buffer = new Uint8Array(this.count);
     }
 
-    randomise() {
-        this.root = this.randomise_recursive(this.root);
+    randomise(xstart, xend, ystart, yend) {
+        if (xstart === undefined) {
+            xstart = 0;
+            ystart = 0;
+            xend = 1 << this.root.level;
+            yend = 1 << this.root.level;
+        }
+        let root = this.randomise_recursive(this.root, xstart, xend, ystart, yend);
+        if (root !== this.root) {
+            this.update_buffer(root);
+        }
+        this.root = root;
     }
 
-    randomise_recursive(node) {
+    clear(xstart, xend, ystart, yend) {
+        if (xstart === undefined) {
+            xstart = 0;
+            ystart = 0;
+            xend = 1 << this.root.level;
+            yend = 1 << this.root.level;
+        }
+        let root = this.fill_recursive(this.root, 0, xstart, xend, ystart, yend);
+        if (root !== this.root) {
+            this.update_buffer(root);
+        }
+        this.root = root;
+    }
+
+    fill_recursive(node, state, xstart, xend, ystart, yend, xoff=0, yoff=0) {
+        let offset = 1 << (node.level-1);
+        let dim = 1 << node.level;
+        // ignore
+        if (xstart >= dim || ystart >= dim || xend < 0 || yend < 0) {
+            return node;
+        }
+        // single level
+        if (node.level === 0) {
+            return node.create(state);
+        }
+        // randomise
+        let nw = this.fill_recursive(node.nw, state, xstart               , min(xend, offset-1), ystart               , min(yend, offset-1), xoff       , yoff);
+        let ne = this.fill_recursive(node.ne, state, max(0, xstart-offset), xend-offset        , ystart               , min(yend, offset-1), xoff+offset, yoff);
+        let sw = this.fill_recursive(node.sw, state, xstart               , min(xend, offset-1), max(0, ystart-offset), yend-offset        , xoff       , yoff+offset);
+        let se = this.fill_recursive(node.se, state, max(0, xstart-offset), xend-offset        , max(0, ystart-offset), yend-offset        , xoff+offset, yoff+offset);
+        let other = node.create(nw, ne, sw, se);
+        return other;
+    }
+
+    randomise_recursive(node, xstart, xend, ystart, yend, xoff=0, yoff=0) {
+        let offset = 1 << (node.level-1);
+        let dim = 1 << node.level;
+        // ignore
+        if (xstart >= dim || ystart >= dim || xend < 0 || yend < 0) {
+            return node;
+        }
+        // single level
         if (node.level === 0) {
             let state = (Math.random() > 0.5) ? 1 : 0;
             return node.create(state);
         }
-        let nw = this.randomise_recursive(node.nw);
-        let ne = this.randomise_recursive(node.ne);
-        let sw = this.randomise_recursive(node.sw);
-        let se = this.randomise_recursive(node.se);
+        // randomise
+        let nw = this.randomise_recursive(node.nw, xstart               , min(xend, offset-1), ystart               , min(yend, offset-1), xoff       , yoff);
+        let ne = this.randomise_recursive(node.ne, max(0, xstart-offset), xend-offset        , ystart               , min(yend, offset-1), xoff+offset, yoff);
+        let sw = this.randomise_recursive(node.sw, xstart               , min(xend, offset-1), max(0, ystart-offset), yend-offset        , xoff       , yoff+offset);
+        let se = this.randomise_recursive(node.se, max(0, xstart-offset), xend-offset        , max(0, ystart-offset), yend-offset        , xoff+offset, yoff+offset);
         let other = node.create(nw, ne, sw, se);
         return other;
     }
 
     step() {
+        let root = undefined;
         if (this.root.level >= 8) {
-            this.wrapped_step();
+            root = this.wrapped_step(this.root);
         } else {
-            this.expanding_step(); 
+            root = this.expanding_step(this.root); 
         }
 
         // this.expanding_step(); 
-        this.update_buffer();
+        if (this.root !== root) {
+            this.update_buffer(root);
+        }
+        this.root = root;
     }
 
-    expanding_step() {
+    expanding_step(root) {
         while (true) {
-            let root = this.root;
             let [nw, ne, sw, se] = [root.nw, root.ne, root.sw, root.se];
             if (root.level < 3 ||
                 nw.population !== nw.se.se.population ||
@@ -56,44 +115,63 @@ export class Simulation {
                 sw.population !== sw.ne.ne.population ||
                 se.population !== se.nw.nw.population)
             {
-                this.root = this.root.expand();
+                root = root.expand();
             } else {
                 break;
             }
         }
-        this.root = this.root.get_next_generation();
+        return root.get_next_generation();
     }
 
-    wrapped_step() {
-        let orig = this.root;
-        let center = this.root.get_next_generation();
-        let horizontal = orig.create(orig.ne, orig.nw, orig.se, orig.sw).get_next_generation();
-        let vertical = orig.create(orig.sw, orig.se, orig.nw, orig.ne).get_next_generation();
-        let corner = orig.create(orig.se, orig.sw, orig.ne, orig.nw).get_next_generation();
+    wrapped_step(root) {
+        let center = root.get_next_generation();
+        let horizontal = root.create(root.ne, root.nw, root.se, root.sw).get_next_generation();
+        let vertical = root.create(root.sw, root.se, root.nw, root.ne).get_next_generation();
+        let corner = root.create(root.se, root.sw, root.ne, root.nw).get_next_generation();
 
-        let nw = orig.create(corner.se, vertical.sw, horizontal.ne, center.nw);
-        let ne = orig.create(vertical.se, corner.sw, center.ne, horizontal.nw);
-        let sw = orig.create(horizontal.se, center.sw, corner.ne, vertical.nw);
-        let se = orig.create(center.se, horizontal.sw, vertical.ne, corner.nw);
+        let nw = root.create(corner.se, vertical.sw, horizontal.ne, center.nw);
+        let ne = root.create(vertical.se, corner.sw, center.ne, horizontal.nw);
+        let sw = root.create(horizontal.se, center.sw, corner.ne, vertical.nw);
+        let se = root.create(center.se, horizontal.sw, vertical.ne, corner.nw);
 
-        let root = orig.create(nw, ne, sw, se);
-        this.root = root;
+        return root.create(nw, ne, sw, se);
     }
 
-    update_buffer() {
-        this.construct_buffer();
-        this.draw_recursive(this.root, 0, 0);
+    update_buffer(root) {
+        // this.construct_buffer();
+        this.draw_recursive(root, this.buffer, this.shape, 0, this.shape[0], 0, this.shape[1]);
     }
 
-    draw_recursive(node, xoff, yoff) {
-        if (node.level === 0) {
-            this.buffer[xoff + yoff*this.shape[0]] = node.population ? 0 : 255;
+    draw_recursive(node, buffer, shape, xstart, xend, ystart, yend, xoff=0, yoff=0) {
+        // determine which rects to draw to
+        let offset = 1 << (node.level-1);
+        let dim = 1 << node.level;
+        // console.log(`level=${node.level}, xoff=${xoff}, yoff=${yoff}, x=${xstart}...${xend}, y=${ystart}...${yend}`);
+        // ignore
+        if (xstart >= dim || ystart >= dim || xend < 0 || yend < 0) {
             return;
         }
-        let offset = 1 << (node.level-1);
-        this.draw_recursive(node.nw, xoff       , yoff);
-        this.draw_recursive(node.ne, xoff+offset, yoff);
-        this.draw_recursive(node.sw, xoff       , yoff+offset);
-        this.draw_recursive(node.se, xoff+offset, yoff+offset);
+        // at base case we expect (x, y) of where to draw the pixel
+        // xtart, ystart, xend, yend determine where we write to the buffer
+        if (node.level === 0) {
+            let state = node.population > 0 ? 255 : 0;
+            buffer[(xoff+xstart) + (yoff+ystart)*shape[0]] = state;
+            return;
+        }
+
+        this.draw_recursive(node.nw, buffer, shape, xstart               , min(xend, offset-1), ystart               , min(yend, offset-1), xoff       , yoff);
+        this.draw_recursive(node.ne, buffer, shape, max(0, xstart-offset), xend-offset        , ystart               , min(yend, offset-1), xoff+offset, yoff);
+        this.draw_recursive(node.sw, buffer, shape, xstart               , min(xend, offset-1), max(0, ystart-offset), yend-offset        , xoff       , yoff+offset);
+        this.draw_recursive(node.se, buffer, shape, max(0, xstart-offset), xend-offset        , max(0, ystart-offset), yend-offset        , xoff+offset, yoff+offset);
     }
+}
+
+function min(x, y) {
+    if (x >= y) return y;
+    return x;
+}
+
+function max(x, y) {
+    if (x >= y) return x;
+    return y;
 }

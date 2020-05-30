@@ -38,9 +38,8 @@ export class App {
         this.vao = new VertexArrayObject(gl);
         this.vao.add_vertex_buffer(this.vbo, layout);
 
-        this.sim = new Simulation(8);
-        this.sim.randomise();
-        this.sim.update_buffer();
+        this.sim = new Simulation(10);
+        // this.sim.randomise(0, 1 << 10, 0, 1 << 10);
 
         this.grid = new GridRender(gl, this.sim.buffer, this.sim.shape);
 
@@ -70,22 +69,17 @@ export class App {
 
     step() {
         this.sim.step();
-        this.sim.update_buffer();
-        if (this.sim.buffer !== this.grid.data) {
-            this.grid = new GridRender(this.gl, this.sim.buffer, this.sim.shape);
-        } else {
-            this.grid.refresh();
-        }
+        this.grid.refresh();
     }
 
-    randomise() {
-        this.sim.randomise();
-        this.sim.update_buffer();
-        if (this.sim.buffer !== this.grid.data) {
-            this.grid = new GridRender(this.gl, this.sim.buffer, this.sim.shape);
-        } else {
-            this.grid.refresh();
-        }
+    clear(xstart, xend, ystart, yend) {
+        this.sim.clear(xstart, xend, ystart, yend);
+        this.grid.refresh();
+    }
+
+    randomise(xstart, xend, ystart, yend) {
+        this.sim.randomise(xstart, xend, ystart, yend);
+        this.grid.refresh();
     }
 
     on_render() {
