@@ -1,0 +1,19 @@
+{
+  "files": {
+    "main.js": "/HashLife/static/js/main.11a12193.chunk.js",
+    "main.js.map": "/HashLife/static/js/main.11a12193.chunk.js.map",
+    "runtime-main.js": "/HashLife/static/js/runtime-main.b1636f05.js",
+    "runtime-main.js.map": "/HashLife/static/js/runtime-main.b1636f05.js.map",
+    "static/js/2.c2b60f4c.chunk.js": "/HashLife/static/js/2.c2b60f4c.chunk.js",
+    "static/js/2.c2b60f4c.chunk.js.map": "/HashLife/static/js/2.c2b60f4c.chunk.js.map",
+    "index.html": "/HashLife/index.html",
+    "precache-manifest.8fec098e3971731ad20769a16ba2c7a3.js": "/HashLife/precache-manifest.8fec098e3971731ad20769a16ba2c7a3.js",
+    "service-worker.js": "/HashLife/service-worker.js",
+    "static/js/2.c2b60f4c.chunk.js.LICENSE.txt": "/HashLife/static/js/2.c2b60f4c.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.b1636f05.js",
+    "static/js/2.c2b60f4c.chunk.js",
+    "static/js/main.11a12193.chunk.js"
+  ]
+}
