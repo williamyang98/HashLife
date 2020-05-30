@@ -2,7 +2,8 @@ import { HashLifeNode } from "./HashLife";
 
 export class Simulation {
     constructor(initial_level=3) {
-        this.root = HashLifeNode.bootstrap(0, initial_level);
+        this.time_compression = true;
+        this.root = HashLifeNode.bootstrap(0, initial_level, this.time_compression);
         this.construct_buffer();
     }
 
@@ -18,24 +19,30 @@ export class Simulation {
     }
 
     randomise() {
-        let dim = (1 << this.root.level);
-        // randomise abit
-        for (let x = 0; x < dim; x++) {
-            for (let y = 0; y < dim; y++) {
-                let state = (Math.random() > 0.5) ? 1 : 0;
-                if (state) {
-                    this.root = this.root.set(x, y, 1);
-                }
-            }
+        this.root = this.randomise_recursive(this.root);
+    }
+
+    randomise_recursive(node) {
+        if (node.level === 0) {
+            let state = (Math.random() > 0.5) ? 1 : 0;
+            return node.create(state);
         }
+        let nw = this.randomise_recursive(node.nw);
+        let ne = this.randomise_recursive(node.ne);
+        let sw = this.randomise_recursive(node.sw);
+        let se = this.randomise_recursive(node.se);
+        let other = node.create(nw, ne, sw, se);
+        return other;
     }
 
     step() {
-        if (this.root.level >= 9) {
+        if (this.root.level >= 8) {
             this.wrapped_step();
         } else {
             this.expanding_step(); 
         }
+
+        // this.expanding_step(); 
         this.update_buffer();
     }
 

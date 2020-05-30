@@ -1,13 +1,14 @@
 import { QuadTreeNode } from "./QuadTree";
 
 export class QuadTreeSimulated extends QuadTreeNode {
-    constructor(nw, ne, sw, se) {
+    constructor(nw, ne, sw, se, time_compression=false) {
         super(nw, ne, sw, se);
         this.result = null;
+        this.time_compression = time_compression;
     }
 
-    create(nw, ne, sw, se) {
-        return new QuadTreeSimulated(nw, ne, sw, se);
+    create(nw, ne, sw, se, time_compression=false) {
+        return new QuadTreeSimulated(nw, ne, sw, se, time_compression);
     }
 
     create_horizontal(west, east) {
@@ -87,17 +88,40 @@ export class QuadTreeSimulated extends QuadTreeNode {
         // 0 x x x
         // 1 x x x
         // 2 x x x
-        let n00 = this.nw.get_next_generation(); 
-        let n01 = this.create_horizontal(this.nw, this.ne).get_next_generation();
-        let n02 = this.ne.get_next_generation(); 
+        let n00 = this.nw; 
+        let n01 = this.create_horizontal(this.nw, this.ne);
+        let n02 = this.ne; 
 
-        let n10 = this.create_vertical(this.nw, this.sw).get_next_generation(); 
-        let n11 = this.create_center().get_next_generation();
-        let n12 = this.create_vertical(this.ne, this.se).get_next_generation(); 
+        let n10 = this.create_vertical(this.nw, this.sw); 
+        let n11 = this.create_center();
+        let n12 = this.create_vertical(this.ne, this.se); 
 
-        let n20 = this.sw.get_next_generation(); 
-        let n21 = this.create_horizontal(this.sw, this.se).get_next_generation();
-        let n22 = this.se.get_next_generation(); 
+        let n20 = this.sw; 
+        let n21 = this.create_horizontal(this.sw, this.se);
+        let n22 = this.se; 
+
+        // temporal compression
+        if (this.time_compression) {
+            n00 = n00.get_next_generation();
+            n01 = n01.get_next_generation();
+            n02 = n02.get_next_generation();
+            n10 = n10.get_next_generation();
+            n11 = n11.get_next_generation();
+            n12 = n12.get_next_generation();
+            n20 = n20.get_next_generation();
+            n21 = n21.get_next_generation();
+            n22 = n22.get_next_generation();
+        } else {
+            n00 = n00.create_center();
+            n01 = n01.create_center();
+            n02 = n02.create_center();
+            n10 = n10.create_center();
+            n11 = n11.create_center();
+            n12 = n12.create_center();
+            n20 = n20.create_center();
+            n21 = n21.create_center();
+            n22 = n22.create_center();
+        }
 
         // quads from these
         let nw = this.create(n00, n01, n10, n11).get_next_generation();

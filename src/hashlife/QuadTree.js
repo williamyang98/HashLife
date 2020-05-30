@@ -1,10 +1,10 @@
 export class QuadTreeNode {
     constructor(nw, ne, sw, se) {
         if (ne === undefined) {
-            if (typeof nw === 'object') {
-                console.error(nw);
-                throw new Error('Invalid level 0 node');
-            }
+            // if (typeof nw === 'object') {
+            //     console.error(nw);
+            //     throw new Error('Invalid level 0 node');
+            // }
             this.population = nw;
             this.level = 0;
             return;
@@ -15,13 +15,13 @@ export class QuadTreeNode {
         this.sw = sw;
         this.se = se;
 
-        if (this.nw.level !== this.ne.level ||
-            this.nw.level !== this.sw.level ||
-            this.nw.level !== this.se.level) 
-        {
-            console.error(this);
-            throw new Error(`Nodes of level are not the same: ${this}`);
-        }
+        // if (this.nw.level !== this.ne.level ||
+        //     this.nw.level !== this.sw.level ||
+        //     this.nw.level !== this.se.level) 
+        // {
+        //     console.error(this);
+        //     throw new Error(`Nodes of level are not the same: ${this}`);
+        // }
 
         this.level = this.nw.level + 1;
         this.population = nw.population + ne.population + sw.population + se.population;
@@ -30,7 +30,8 @@ export class QuadTreeNode {
     // factory methods
     // allows for overriding to perform intermediate hashing
     create(nw, ne, sw, se) {
-        return new QuadTreeNode(nw, ne, sw, se);
+        throw new Error("Shouldn't use this factory method for node creation");
+        // return new QuadTreeNode(nw, ne, sw, se);
     }
 
     static bootstrap(alive, level) {
