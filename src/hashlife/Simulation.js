@@ -1,8 +1,8 @@
 import { HashLifeNode } from "./HashLife";
 
 export class Simulation {
-    constructor(initial_level=3) {
-        this.time_compression = true;
+    constructor(initial_level=3, time_compression=false) {
+        this.time_compression = time_compression;
         this.root = HashLifeNode.bootstrap(0, initial_level, this.time_compression);
         this.construct_buffer();
     }
