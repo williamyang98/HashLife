@@ -59,7 +59,9 @@ export class App {
     }
 
     on_update() {
-        this.step();
+        if (this.running) {
+            this.step();
+        }
         if (this.steps > 0) {
             this.step();
             this.steps -= 1;
@@ -68,6 +70,16 @@ export class App {
 
     step() {
         this.sim.step();
+        this.sim.update_buffer();
+        if (this.sim.buffer !== this.grid.data) {
+            this.grid = new GridRender(this.gl, this.sim.buffer, this.sim.shape);
+        } else {
+            this.grid.refresh();
+        }
+    }
+
+    randomise() {
+        this.sim.randomise();
         this.sim.update_buffer();
         if (this.sim.buffer !== this.grid.data) {
             this.grid = new GridRender(this.gl, this.sim.buffer, this.sim.shape);

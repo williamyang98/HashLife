@@ -24,9 +24,15 @@ export class AppView extends React.Component {
   }  
 
   step() {
-    if (this.app !== undefined) {
-      this.app.steps = 1;
-    }
+    this.app.steps = 1;
+  }
+
+  toggle() {
+    this.app.running = !this.app.running;
+  }
+
+  randomise() {
+    this.app.randomise();
   }
 
   render() {
@@ -36,7 +42,9 @@ export class AppView extends React.Component {
 
     return (
       <div>
+        <button onClick={ev => this.randomise()}>Randomiser</button>
         <button onClick={ev => this.step()}>Step</button>
+        <button onClick={ev => this.toggle()}>Toggle</button>
         <canvas width={800} height={800} ref={this.ref}></canvas>
       </div>
     );
