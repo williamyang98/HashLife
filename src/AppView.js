@@ -81,10 +81,12 @@ export class AppView extends React.Component {
 
     return (
       <div>
-        <button onClick={ev => this.clear()}>Clear</button>
-        <button onClick={ev => this.step()}>Step</button>
-        <button onClick={ev => this.toggle()}>Toggle</button>
-        <button onClick={ev => this.randomise()}>Randomise</button>
+        <div>
+          <button onClick={ev => this.clear()}>Clear</button>
+          <button onClick={ev => this.step()}>Step</button>
+          <button onClick={ev => this.toggle()}>Toggle</button>
+          <button onClick={ev => this.randomise()}>Randomise</button>
+        </div>
         <canvas width={1024} height={1024} ref={this.ref}
                 onMouseDown={ev => this.on_mouse_down(ev)}
                 onMouseMove={ev => this.on_mouse_move(ev)}
