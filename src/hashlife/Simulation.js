@@ -36,14 +36,14 @@ export class Simulation {
         return [cX, cY];
     }
 
-    clear(xstart, xend, ystart, yend) {
+    set_region(xstart, xend, ystart, yend, value) {
         if (xstart === undefined) {
             xstart = 0;
             ystart = 0;
             xend = 1 << this.root.level;
             yend = 1 << this.root.level;
         }
-        let root = this.fill_recursive(this.root, 0, xstart, xend, ystart, yend);
+        let root = this.fill_recursive(this.root, value, xstart, xend, ystart, yend);
         this.update_buffer(root, this.root);
         this.root = root;
     }

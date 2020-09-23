@@ -56,7 +56,7 @@ export class HashedFactory extends SimulatedFactory {
         let key = this.hash_code(nw, ne, sw, se);
         let nodes = this.map[key];
 
-        if (nodes == undefined) {
+        if (nodes === undefined) {
             let node = this.create_instance(nw, ne, sw, se);
             this.map[key] = [node];
             this.misses += 1;

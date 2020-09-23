@@ -88,9 +88,17 @@ export class App {
     }
 
     clear(xstart, xend, ystart, yend) {
+        this.set(xstart, xend, ystart, yend, 0);
+    }
+
+    fill(xstart, xend, ystart, yend) {
+        this.set(xstart, xend, ystart, yend, 1);
+    }
+
+    set(xstart, xend, ystart, yend, value) {
         [xstart, ystart] = this.sim.map_relative_to_abs_coords(xstart, ystart); 
         [xend, yend] = this.sim.map_relative_to_abs_coords(xend, yend); 
-        this.sim.clear(xstart, xend, ystart, yend);
+        this.sim.set_region(xstart, xend, ystart, yend, value);
         this.steps = 0;
         this.grid.refresh();
         this.notify();

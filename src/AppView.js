@@ -3,6 +3,12 @@ import { App } from './app/App';
 import { vec2 } from 'gl-matrix';
 import "./AppView.css";
 
+const EditModes = {
+  'FILL': 0,
+  'CLEAR': 1,
+  'RANDOM': 2,
+};
+
 export class AppView extends React.Component {
   constructor(props) {
     super(props);
@@ -13,7 +19,8 @@ export class AppView extends React.Component {
       nodes: 0,
       steps: 0,
       time_compression: true,
-      size: 10,
+      size: 8,
+      editMode: EditModes.RANDOM
     };
     this.controller = new MouseController();
   }
@@ -41,10 +48,19 @@ export class AppView extends React.Component {
       let xend = Math.max(start[0], end[0]);
       let ystart = Math.min(start[1], end[1]);
       let yend = Math.max(start[1], end[1]);
-      if (this.is_randomise) {
-        this.app.randomise(xstart, xend, ystart, yend);
-      } else if (this.is_clear) {
-        this.app.clear(xstart, xend, ystart, yend);
+      console.log(start, end, this.state.editMode);
+      switch (this.state.editMode) {
+        case EditModes.FILL:
+          this.app.fill(xstart, xend, ystart, yend); 
+          break;
+        case EditModes.RANDOM:
+          this.app.randomise(xstart, xend, ystart, yend);
+          break;
+        case EditModes.CLEAR:
+          this.app.clear(xstart, xend, ystart, yend);
+          break;
+        default:
+          return;
       }
     })
   }  
@@ -63,16 +79,8 @@ export class AppView extends React.Component {
   }
 
   on_mouse_down(ev) {
-    this.controller.on_mouse_down(ev);
-    switch (ev.button) {
-      case 0: 
-        this.is_randomise = true; 
-        this.is_clear = false; 
-        break;
-      case 2: 
-        this.is_randomise = false;
-        this.is_clear = true; 
-        break;
+    if (ev.button === 0) {
+      this.controller.on_mouse_down(ev);
     }
   }
 
@@ -81,9 +89,10 @@ export class AppView extends React.Component {
   }
 
   on_mouse_up(ev) {
+    if (ev.button !== 0) {
+      return;
+    }
     this.controller.on_mouse_up(ev);
-    this.is_randomise = false;
-    this.is_clear = false;
     ev.preventDefault();
   }
 
@@ -106,6 +115,7 @@ export class AppView extends React.Component {
           {this.render_controls()}
           {this.render_settings()}
           {this.render_stats()}
+          {this.render_modes()}
         </div>
         <div className="flex-item">
           <canvas className="view" width={1024} height={1024} ref={this.ref}
@@ -163,6 +173,22 @@ export class AppView extends React.Component {
         <button type="submit" className="button primary small">Update Settings</button>
       </form>
     </div> 
+  }
+
+  render_modes() {
+    let onChange = ev => {
+      let value = Number(ev.target.value);
+      this.setState({...this.state, editMode: value});
+    }
+
+    return <div>
+      <h3>Edit mode</h3>
+      <select value={this.state.editMode} onChange={onChange}>
+        <option value={EditModes.FILL}>Fill</option>
+        <option value={EditModes.CLEAR}>Clear</option>
+        <option value={EditModes.RANDOM}>Randomise</option>
+      </select>
+    </div>
   }
 }
 
