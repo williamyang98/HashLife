@@ -27,6 +27,15 @@ export class Simulation {
         this.root = root;
     }
 
+    // map from 0 to 1.0 to 0 to width
+    // relative: [0, 1.0]
+    // absolute: [0, width] or [0, height
+    map_relative_to_abs_coords(x, y) {
+        let cX = x * this.shape[0];
+        let cY = y * this.shape[1];
+        return [cX, cY];
+    }
+
     clear(xstart, xend, ystart, yend) {
         if (xstart === undefined) {
             xstart = 0;

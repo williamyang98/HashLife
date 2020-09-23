@@ -54,7 +54,7 @@ export class AppView extends React.Component {
   }
 
   step() {
-    this.app.steps = 1;
+    this.app.step();
   }
 
   toggle() {
@@ -181,7 +181,7 @@ class MouseController {
     var rect = ev.target.getBoundingClientRect();
     var x = ev.clientX - rect.left; //x position within the element.
     var y = ev.clientY - rect.top;  //y position within the element.
-    return vec2.fromValues(x, y);
+    return vec2.fromValues(x/rect.width, y/rect.height);
   }
 
   on_mouse_down(ev) {

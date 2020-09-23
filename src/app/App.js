@@ -88,6 +88,8 @@ export class App {
     }
 
     clear(xstart, xend, ystart, yend) {
+        [xstart, ystart] = this.sim.map_relative_to_abs_coords(xstart, ystart); 
+        [xend, yend] = this.sim.map_relative_to_abs_coords(xend, yend); 
         this.sim.clear(xstart, xend, ystart, yend);
         this.steps = 0;
         this.grid.refresh();
@@ -95,6 +97,8 @@ export class App {
     }
 
     randomise(xstart, xend, ystart, yend) {
+        [xstart, ystart] = this.sim.map_relative_to_abs_coords(xstart, ystart); 
+        [xend, yend] = this.sim.map_relative_to_abs_coords(xend, yend); 
         this.sim.randomise(xstart, xend, ystart, yend);
         this.grid.refresh();
         this.notify();
