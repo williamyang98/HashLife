@@ -42,3 +42,4 @@ If N=2^d, then each simulation step give T=i+2^(d-2). This gives us time compres
 - Add highlighting for selected region
 - Add browser to drag/drop of well known configurations (methuselahs and basic forms)
 - Add loading in of configurations and seeded worlds 
+- Unusual performance penalty when deploying react app (need to investigate)
