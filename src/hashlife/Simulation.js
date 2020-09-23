@@ -1,24 +1,17 @@
-import { HashLifeNode } from "./HashLife";
+// import { HashLifeNode } from "./HashLife";
+import { HashedFactory } from "./HashedFactory";
 
 export class Simulation {
     constructor(initial_level=3, time_compression=false) {
-        this.time_compression = time_compression;
-        this.root = HashLifeNode.bootstrap(0, initial_level, this.time_compression);
-        this.construct_buffer();
+        this.factory = new HashedFactory(time_compression);
+        this.root = this.factory.create_tree(0, initial_level);
+        this.construct_buffer(initial_level);
     }
 
-    construct_buffer() {
-        // if (this.root.level === this.current_level) {
-        //     return;
-        // }
-        // this.current_level = this.root.level;
-        // let dim = (1 << this.root.level);
-        // this.shape = [dim, dim];
-        // this.count = dim*dim; 
-        // this.buffer = new Uint8Array(this.count);
-        // this.shape = [8, 8];
-        this.shape = [1024, 1024];
-        this.count = this.shape[0] * this.shape[1];
+    construct_buffer(level) {
+        let dim = (1 << level);
+        this.shape = [dim, dim];
+        this.count = dim*dim;
         this.buffer = new Uint8Array(this.count);
     }
 
@@ -59,14 +52,14 @@ export class Simulation {
         }
         // single level
         if (node.level === 0) {
-            return node.create(state);
+            return this.factory.create(state);
         }
         // randomise
         let nw = this.fill_recursive(node.nw, state, xstart               , min(xend, offset-1), ystart               , min(yend, offset-1), xoff       , yoff);
         let ne = this.fill_recursive(node.ne, state, max(0, xstart-offset), xend-offset        , ystart               , min(yend, offset-1), xoff+offset, yoff);
         let sw = this.fill_recursive(node.sw, state, xstart               , min(xend, offset-1), max(0, ystart-offset), yend-offset        , xoff       , yoff+offset);
         let se = this.fill_recursive(node.se, state, max(0, xstart-offset), xend-offset        , max(0, ystart-offset), yend-offset        , xoff+offset, yoff+offset);
-        let other = node.create(nw, ne, sw, se);
+        let other = this.factory.create(nw, ne, sw, se);
         return other;
     }
 
@@ -80,14 +73,14 @@ export class Simulation {
         // single level
         if (node.level === 0) {
             let state = (Math.random() > 0.5) ? 1 : 0;
-            return node.create(state);
+            return this.factory.create(state);
         }
         // randomise
         let nw = this.randomise_recursive(node.nw, xstart               , min(xend, offset-1), ystart               , min(yend, offset-1), xoff       , yoff);
         let ne = this.randomise_recursive(node.ne, max(0, xstart-offset), xend-offset        , ystart               , min(yend, offset-1), xoff+offset, yoff);
         let sw = this.randomise_recursive(node.sw, xstart               , min(xend, offset-1), max(0, ystart-offset), yend-offset        , xoff       , yoff+offset);
         let se = this.randomise_recursive(node.se, max(0, xstart-offset), xend-offset        , max(0, ystart-offset), yend-offset        , xoff+offset, yoff+offset);
-        let other = node.create(nw, ne, sw, se);
+        let other = this.factory.create(nw, ne, sw, se);
         return other;
     }
 
@@ -115,26 +108,30 @@ export class Simulation {
                 sw.population !== sw.ne.ne.population ||
                 se.population !== se.nw.nw.population)
             {
-                root = root.expand();
+                root = this.factory.expand(root);
             } else {
                 break;
             }
         }
-        return root.get_next_generation();
+        return this.factory.get_next_generation(root);
     }
 
     wrapped_step(root) {
-        let center = root.get_next_generation();
-        let horizontal = root.create(root.ne, root.nw, root.se, root.sw).get_next_generation();
-        let vertical = root.create(root.sw, root.se, root.nw, root.ne).get_next_generation();
-        let corner = root.create(root.se, root.sw, root.ne, root.nw).get_next_generation();
+        let center = this.factory.get_next_generation(root);
+        let horizontal = this.factory.create(root.ne, root.nw, root.se, root.sw);
+        let vertical = this.factory.create(root.sw, root.se, root.nw, root.ne);
+        let corner = this.factory.create(root.se, root.sw, root.ne, root.nw);
 
-        let nw = root.create(corner.se, vertical.sw, horizontal.ne, center.nw);
-        let ne = root.create(vertical.se, corner.sw, center.ne, horizontal.nw);
-        let sw = root.create(horizontal.se, center.sw, corner.ne, vertical.nw);
-        let se = root.create(center.se, horizontal.sw, vertical.ne, corner.nw);
+        horizontal = this.factory.get_next_generation(horizontal);
+        vertical = this.factory.get_next_generation(vertical);
+        corner = this.factory.get_next_generation(corner);
 
-        return root.create(nw, ne, sw, se);
+        let nw = this.factory.create(corner.se, vertical.sw, horizontal.ne, center.nw);
+        let ne = this.factory.create(vertical.se, corner.sw, center.ne, horizontal.nw);
+        let sw = this.factory.create(horizontal.se, center.sw, corner.ne, vertical.nw);
+        let se = this.factory.create(center.se, horizontal.sw, vertical.ne, corner.nw);
+
+        return this.factory.create(nw, ne, sw, se);
     }
 
     update_buffer(root) {

@@ -1,14 +1,20 @@
-import { QuadTreeNode } from "./QuadTree";
+import { Node, BasicFactory } from "./BasicFactory";
 
-export class QuadTreeSimulated extends QuadTreeNode {
-    constructor(nw, ne, sw, se, time_compression=false) {
+export class SimulatedNode extends Node {
+    constructor(nw, ne, sw, se) {
         super(nw, ne, sw, se);
         this.result = null;
+    }
+}
+
+export class SimulatedFactory extends BasicFactory {
+    constructor(time_compression) {
+        super();
         this.time_compression = time_compression;
     }
 
-    create(nw, ne, sw, se, time_compression=false) {
-        return new QuadTreeSimulated(nw, ne, sw, se, time_compression);
+    create(nw, ne, sw, se) {
+        return SimulatedNode(nw, ne, sw, se);
     }
 
     create_horizontal(west, east) {
@@ -31,25 +37,27 @@ export class QuadTreeSimulated extends QuadTreeNode {
         return this.create(north.sw, north.se, south.nw, south.ne);
     }
 
-    create_center() {
-        return this.create(this.nw.se, this.ne.sw, this.sw.ne, this.se.nw);
+    create_center(node) {
+        return this.create(
+            node.nw.se, node.ne.sw, 
+            node.sw.ne, node.se.nw);
     }
 
     // current node can only determine centered subnode 1 level down
-    get_next_generation() {
+    get_next_generation(node) {
         // if result cached, just send
-        if (this.result !== null) {
-            return this.result;
+        if (node.result !== null) {
+            return node.result;
         }
         // empty then ignore
-        if (this.population === 0) {
-            this.result = this.nw;
-            return this.result;
+        if (node.population === 0) {
+            node.result = node.nw;
+            return node.result;
         }
         // if at level 2 (4x4), we can perform a the slow simulation
-        if (this.level === 2) {
-            this.result = this.slow_simulation();
-            return this.result;
+        if (node.level === 2) {
+            node.result = this.slow_simulation(node);
+            return node.result;
         }
         // consider a level 3 node
         // this would be 8x8
@@ -88,50 +96,55 @@ export class QuadTreeSimulated extends QuadTreeNode {
         // 0 x x x
         // 1 x x x
         // 2 x x x
-        let n00 = this.nw; 
-        let n01 = this.create_horizontal(this.nw, this.ne);
-        let n02 = this.ne; 
+        let n00 = node.nw; 
+        let n01 = this.create_horizontal(node.nw, node.ne);
+        let n02 = node.ne; 
 
-        let n10 = this.create_vertical(this.nw, this.sw); 
-        let n11 = this.create_center();
-        let n12 = this.create_vertical(this.ne, this.se); 
+        let n10 = this.create_vertical(node.nw, node.sw); 
+        let n11 = this.create_center(node);
+        let n12 = this.create_vertical(node.ne, node.se); 
 
-        let n20 = this.sw; 
-        let n21 = this.create_horizontal(this.sw, this.se);
-        let n22 = this.se; 
+        let n20 = node.sw; 
+        let n21 = this.create_horizontal(node.sw, node.se);
+        let n22 = node.se; 
 
         // temporal compression
         if (this.time_compression) {
-            n00 = n00.get_next_generation();
-            n01 = n01.get_next_generation();
-            n02 = n02.get_next_generation();
-            n10 = n10.get_next_generation();
-            n11 = n11.get_next_generation();
-            n12 = n12.get_next_generation();
-            n20 = n20.get_next_generation();
-            n21 = n21.get_next_generation();
-            n22 = n22.get_next_generation();
+            n00 = this.get_next_generation(n00);
+            n01 = this.get_next_generation(n01);
+            n02 = this.get_next_generation(n02);
+            n10 = this.get_next_generation(n10);
+            n11 = this.get_next_generation(n11);
+            n12 = this.get_next_generation(n12);
+            n20 = this.get_next_generation(n20);
+            n21 = this.get_next_generation(n21);
+            n22 = this.get_next_generation(n22);
         } else {
-            n00 = n00.create_center();
-            n01 = n01.create_center();
-            n02 = n02.create_center();
-            n10 = n10.create_center();
-            n11 = n11.create_center();
-            n12 = n12.create_center();
-            n20 = n20.create_center();
-            n21 = n21.create_center();
-            n22 = n22.create_center();
+            n00 = this.create_center(n00);
+            n01 = this.create_center(n01);
+            n02 = this.create_center(n02);
+            n10 = this.create_center(n10);
+            n11 = this.create_center(n11);
+            n12 = this.create_center(n12);
+            n20 = this.create_center(n20);
+            n21 = this.create_center(n21);
+            n22 = this.create_center(n22);
         }
 
         // quads from these
-        let nw = this.create(n00, n01, n10, n11).get_next_generation();
-        let ne = this.create(n01, n02, n11, n12).get_next_generation();
-        let sw = this.create(n10, n11, n20, n21).get_next_generation();
-        let se = this.create(n11, n12, n21, n22).get_next_generation();
+        let nw = this.create(n00, n01, n10, n11);
+        let ne = this.create(n01, n02, n11, n12);
+        let sw = this.create(n10, n11, n20, n21);
+        let se = this.create(n11, n12, n21, n22);
+
+        nw = this.get_next_generation(nw);
+        ne = this.get_next_generation(ne);
+        sw = this.get_next_generation(sw);
+        se = this.get_next_generation(se);
 
         // stitch results into a central quad
-        this.result = this.create(nw, ne, sw, se);
-        return this.result;
+        node.result = this.create(nw, ne, sw, se);
+        return node.result;
     }
 
     // take in a 4x4 node
@@ -146,13 +159,13 @@ export class QuadTreeSimulated extends QuadTreeNode {
     // 3 | 12 13 14 15
     // we only consider centre (2x2)
     // this would be bits 10, 9, 6, 5
-    slow_simulation() {
+    slow_simulation(node) {
         let bits = 0;
         // store the 4x4 data inside a 16bit value
         for (let x = 0; x < 4; x++) {
             for (let y = 0; y < 4; y++) {
                 // bits = (bits << 1) + this.get(x, y);
-                bits |= this.get(x, y) << (x + y*4);
+                bits |= this.get(node, x, y) << (x + y*4);
             }
         }
         // debug_out(bits);
@@ -195,37 +208,3 @@ export class QuadTreeSimulated extends QuadTreeNode {
         }
     }
 }
-
-function debug_out(bits) {
-    // store the 4x4 data inside a 16bit value
-    let c = [];
-    for (let y = 0; y < 4; y++) {
-        let r = [];
-        for (let x = 0; x < 4; x++) {
-            // bits = (bits << 1) + this.get(x, y);
-            if (bits & (1 << (x + y*4))) {
-                r.push(1);
-            } else {
-                r.push(0);
-            }
-        }
-        c.push(r.join(','));
-    }
-    console.log(c.join('\n'));
-}
-
-function debug_2x2(node) {
-    let c = [];
-    let r = [];
-    r.push(node.nw.population);
-    r.push(node.ne.population);
-    c.push(r.join(','));
-
-    r = [];
-    r.push(node.sw.population);
-    r.push(node.se.population);
-    c.push(r.join(','));
-    console.log(c.join('\n'));
-}
-
-

@@ -1,10 +1,6 @@
-export class QuadTreeNode {
+export class Node {
     constructor(nw, ne, sw, se) {
         if (ne === undefined) {
-            // if (typeof nw === 'object') {
-            //     console.error(nw);
-            //     throw new Error('Invalid level 0 node');
-            // }
             this.population = nw;
             this.level = 0;
             return;
@@ -15,27 +11,16 @@ export class QuadTreeNode {
         this.sw = sw;
         this.se = se;
 
-        // if (this.nw.level !== this.ne.level ||
-        //     this.nw.level !== this.sw.level ||
-        //     this.nw.level !== this.se.level) 
-        // {
-        //     console.error(this);
-        //     throw new Error(`Nodes of level are not the same: ${this}`);
-        // }
-
         this.level = this.nw.level + 1;
         this.population = nw.population + ne.population + sw.population + se.population;
     }
+}
 
+export class BasicFactory {
     // factory methods
     // allows for overriding to perform intermediate hashing
     create(nw, ne, sw, se) {
-        throw new Error("Shouldn't use this factory method for node creation");
-        // return new QuadTreeNode(nw, ne, sw, se);
-    }
-
-    static bootstrap(alive, level) {
-        return new QuadTreeNode(0).create_tree(alive, level);
+        return new Node(nw, ne, sw, se);
     }
 
     create_tree(alive, level) {
@@ -46,8 +31,8 @@ export class QuadTreeNode {
         return this.create(n, n, n, n);
     }
 
-    set(x, y, alive) {
-        if (this.level === 0) {
+    set(node, x, y, alive) {
+        if (node.level === 0) {
             return this.create(alive);
         }
         // quad tree (x, y)
@@ -61,55 +46,58 @@ export class QuadTreeNode {
         // 2 c c d d        0 c c d d       - c c d d
         // 3 c c d d        1 c c d d       - c c d d    
 
-        let offset = 1 << (this.level-1);
-        let [nw, ne, sw, se] = [this.nw, this.ne, this.sw, this.se];
+        let offset = 1 << (node.level-1);
+        let [nw, ne, sw, se] = [
+            node.nw, node.ne, 
+            node.sw, node.se];
+
         if (x >= offset) {
             // nw
             if (y < offset) {
-                nw = this.nw.set(x-offset, y, alive);
+                nw = this.set(nw, x-offset, y, alive);
             // sw
             } else {
-                sw = this.sw.set(x-offset, y-offset, alive);
+                sw = this.set(se, x-offset, y-offset, alive);
             }
         } else {
             // ne
             if (y < offset) {
-                ne = this.ne.set(x, y, alive);
+                ne = this.set(ne, x, y, alive);
             // se
             } else {
-                se = this.se.set(x, y-offset, alive);
+                se = this.set(se, x, y-offset, alive);
             }
         }
 
         return this.create(nw, ne, sw, se);
     }
 
-    get(x, y) {
-        if (this.level === 0) {
-            return this.population;
+    get(node, x, y) {
+        if (node.level === 0) {
+            return node.population;
         }
-        let offset = 1 << (this.level-1);
+        let offset = 1 << (node.level-1);
         if (x >= offset) {
             // nw
             if (y < offset) {
-                return this.ne.get(x-offset, y);
+                return this.get(node.ne, x-offset, y);
             // sw
             } else {
-                return this.se.get(x-offset, y-offset);
+                return this.get(node.se, x-offset, y-offset);
             }
         } else {
             // ne
             if (y < offset) {
-                return this.nw.get(x, y);
+                return this.get(node.nw, x, y);
             // se
             } else {
-                return this.sw.get(x, y-offset);
+                return this.get(node.sw, x, y-offset);
             }
         }
     }
 
     // create a node one level up, where this node is in the center
-    expand() {
+    expand(node) {
         // consider 2x2 case into a 4x4
         // o o o o
         // o x x o
@@ -117,11 +105,11 @@ export class QuadTreeNode {
         // o o o o
         // at level 1 (2x2), we need to generate a border one level down 
         // level 0 (1x1) - pad as border
-        let n = this.create_tree(0, this.level-1);
-        let nw = this.create(n, n, n, this.nw);
-        let ne = this.create(n, n, this.ne, n);
-        let sw = this.create(n, this.sw, n, n);
-        let se = this.create(this.se, n, n, n);
+        let n = this.create_tree(0, node.level-1);
+        let nw = this.create(n, n, n, node.nw);
+        let ne = this.create(n, n, node.ne, n);
+        let sw = this.create(n, node.sw, n, n);
+        let se = this.create(node.se, n, n, n);
         let expanded = this.create(nw, ne, sw, se);
         return expanded;
     }
