@@ -23,9 +23,7 @@ export class Simulation {
             yend = 1 << this.root.level;
         }
         let root = this.randomise_recursive(this.root, xstart, xend, ystart, yend);
-        if (root !== this.root) {
-            this.update_buffer(root);
-        }
+        this.update_buffer(root, this.root);
         this.root = root;
     }
 
@@ -37,9 +35,7 @@ export class Simulation {
             yend = 1 << this.root.level;
         }
         let root = this.fill_recursive(this.root, 0, xstart, xend, ystart, yend);
-        if (root !== this.root) {
-            this.update_buffer(root);
-        }
+        this.update_buffer(root, this.root);
         this.root = root;
     }
 
@@ -93,9 +89,7 @@ export class Simulation {
         }
 
         // this.expanding_step(); 
-        if (this.root !== root) {
-            this.update_buffer(root);
-        }
+        this.update_buffer(root, this.root);
         this.root = root;
     }
 
@@ -134,12 +128,15 @@ export class Simulation {
         return this.factory.create(nw, ne, sw, se);
     }
 
-    update_buffer(root) {
+    update_buffer(new_root, old_root) {
         // this.construct_buffer();
-        this.draw_recursive(root, this.buffer, this.shape, 0, this.shape[0], 0, this.shape[1]);
+        this.draw_recursive(new_root, old_root, this.buffer, this.shape, 0, this.shape[0], 0, this.shape[1]);
     }
 
-    draw_recursive(node, buffer, shape, xstart, xend, ystart, yend, xoff=0, yoff=0) {
+    draw_recursive(node, old, buffer, shape, xstart, xend, ystart, yend, xoff=0, yoff=0) {
+        if (node === old) {
+            return;
+        }
         // determine which rects to draw to
         let offset = 1 << (node.level-1);
         let dim = 1 << node.level;
@@ -156,10 +153,10 @@ export class Simulation {
             return;
         }
 
-        this.draw_recursive(node.nw, buffer, shape, xstart               , min(xend, offset-1), ystart               , min(yend, offset-1), xoff       , yoff);
-        this.draw_recursive(node.ne, buffer, shape, max(0, xstart-offset), xend-offset        , ystart               , min(yend, offset-1), xoff+offset, yoff);
-        this.draw_recursive(node.sw, buffer, shape, xstart               , min(xend, offset-1), max(0, ystart-offset), yend-offset        , xoff       , yoff+offset);
-        this.draw_recursive(node.se, buffer, shape, max(0, xstart-offset), xend-offset        , max(0, ystart-offset), yend-offset        , xoff+offset, yoff+offset);
+        this.draw_recursive(node.nw, old.nw, buffer, shape, xstart               , min(xend, offset-1), ystart               , min(yend, offset-1), xoff       , yoff);
+        this.draw_recursive(node.ne, old.ne, buffer, shape, max(0, xstart-offset), xend-offset        , ystart               , min(yend, offset-1), xoff+offset, yoff);
+        this.draw_recursive(node.sw, old.sw, buffer, shape, xstart               , min(xend, offset-1), max(0, ystart-offset), yend-offset        , xoff       , yoff+offset);
+        this.draw_recursive(node.se, old.se, buffer, shape, max(0, xstart-offset), xend-offset        , max(0, ystart-offset), yend-offset        , xoff+offset, yoff+offset);
     }
 }
 

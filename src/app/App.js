@@ -38,12 +38,25 @@ export class App {
         this.vao = new VertexArrayObject(gl);
         this.vao.add_vertex_buffer(this.vbo, layout);
 
-        this.sim = new Simulation(10, true);
+        // this.sim = new Simulation(10, true);
+        this.sim = new Simulation(10, false);
         // this.sim.randomise(0, 1 << 10, 0, 1 << 10);
 
         this.grid = new GridRender(gl, this.sim.buffer, this.sim.shape);
 
         this.steps = 0;
+
+        this.listeners = new Set();
+    }
+
+    listen(listener) {
+        this.listeners.add(listener);
+    }
+
+    notify() {
+        for (let listener of this.listeners) {
+            listener({steps: this.steps, nodes: this.sim.factory.count});
+        }
     }
 
 
@@ -61,25 +74,26 @@ export class App {
         if (this.running) {
             this.step();
         }
-        if (this.steps > 0) {
-            this.step();
-            this.steps -= 1;
-        }
     }
 
     step() {
         this.sim.step();
+        this.steps += 1;
         this.grid.refresh();
+        this.notify();
     }
 
     clear(xstart, xend, ystart, yend) {
         this.sim.clear(xstart, xend, ystart, yend);
+        this.steps = 0;
         this.grid.refresh();
+        this.notify();
     }
 
     randomise(xstart, xend, ystart, yend) {
         this.sim.randomise(xstart, xend, ystart, yend);
         this.grid.refresh();
+        this.notify();
     }
 
     on_render() {

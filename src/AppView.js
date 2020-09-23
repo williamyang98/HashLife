@@ -7,7 +7,10 @@ export class AppView extends React.Component {
     super(props);
     this.ref = createRef();
     this.state = {
-      failed_webgl: false
+      failed_webgl: false,
+      running: false,
+      nodes: 0,
+      steps: 0,
     };
     this.controller = new MouseController();
   }
@@ -26,6 +29,10 @@ export class AppView extends React.Component {
     this.is_clear = false;
     this.app = app;
 
+    this.app.listen((stats) => {
+      setTimeout(() => this.on_stats(stats), 0);
+    })
+
     this.controller.listen_drag(({start, end}) => {
       let xstart = Math.min(start[0], end[0]);
       let xend = Math.max(start[0], end[0]);
@@ -39,12 +46,17 @@ export class AppView extends React.Component {
     })
   }  
 
+  on_stats({steps, nodes}) {
+    this.setState({...this.state, steps, nodes});
+  }
+
   step() {
     this.app.steps = 1;
   }
 
   toggle() {
     this.app.running = !this.app.running;
+    this.setState({...this.state, running:this.app.running});
   }
 
   on_mouse_down(ev) {
@@ -83,9 +95,11 @@ export class AppView extends React.Component {
       <div>
         <div>
           <button onClick={ev => this.clear()}>Clear</button>
-          <button onClick={ev => this.step()}>Step</button>
-          <button onClick={ev => this.toggle()}>Toggle</button>
+          {!this.state.running && <button onClick={ev => this.step()}>Step</button>}
+          <button onClick={ev => this.toggle()}>{this.state.running ? 'Pause' : 'Resume'}</button>
           <button onClick={ev => this.randomise()}>Randomise</button>
+          <div>Steps: {this.state.steps}</div>
+          <div>Nodes: {this.state.nodes}</div>
         </div>
         <canvas width={1024} height={1024} ref={this.ref}
                 onMouseDown={ev => this.on_mouse_down(ev)}

@@ -43,6 +43,12 @@ export class HashedFactory extends SimulatedFactory {
         this.count = 0;
     }
 
+    create_instance(nw, ne, sw, se) {
+        // if we have separate instances it could possibly reduce mem footprint
+        // different classes for parent node, and base (level 0)
+        return new HashedNode(nw, ne, sw, se);
+    }
+
     // override creation
     // use hashmap (this is the basis for hashlife)
     // we use recursive algorithms specifically for better hashing
@@ -51,7 +57,7 @@ export class HashedFactory extends SimulatedFactory {
         let nodes = this.map[key];
 
         if (nodes == undefined) {
-            let node = new HashedNode(nw, ne, sw, se);
+            let node = this.create_instance(nw, ne, sw, se);
             this.map[key] = [node];
             this.misses += 1;
             this.count += 1;
@@ -67,7 +73,7 @@ export class HashedFactory extends SimulatedFactory {
 
         this.misses += 1;
         this.count += 1;
-        let node = new HashedNode(nw, ne, sw, se);
+        let node = this.create_instance(nw, ne, sw, se);
         nodes.push(node);
         return node;
     }
