@@ -22,7 +22,7 @@ const quad = {
 };
 
 export class App {
-    constructor(gl) {
+    constructor(gl, size, compressed) {
         this.gl = gl;
 
         this.renderer = new Renderer(gl);
@@ -39,14 +39,18 @@ export class App {
         this.vao.add_vertex_buffer(this.vbo, layout);
 
         // this.sim = new Simulation(10, true);
-        this.sim = new Simulation(10, false);
-        // this.sim.randomise(0, 1 << 10, 0, 1 << 10);
-
+        this.sim = new Simulation(size, compressed);
         this.grid = new GridRender(gl, this.sim.buffer, this.sim.shape);
 
         this.steps = 0;
 
         this.listeners = new Set();
+    }
+
+    update_settings(size, compressed) {
+        let gl = this.gl;
+        this.sim = new Simulation(size, compressed);
+        this.grid = new GridRender(gl, this.sim.buffer, this.sim.shape);
     }
 
     listen(listener) {
@@ -97,8 +101,6 @@ export class App {
     }
 
     on_render() {
-        let gl = this.gl;
-
         this.shader.bind();
         this.vao.bind();
         this.ibo.bind();

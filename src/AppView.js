@@ -1,6 +1,7 @@
 import React, { createRef } from 'react';
 import { App } from './app/App';
 import { vec2 } from 'gl-matrix';
+import "./AppView.css";
 
 export class AppView extends React.Component {
   constructor(props) {
@@ -11,6 +12,8 @@ export class AppView extends React.Component {
       running: false,
       nodes: 0,
       steps: 0,
+      time_compression: true,
+      size: 10,
     };
     this.controller = new MouseController();
   }
@@ -23,7 +26,7 @@ export class AppView extends React.Component {
       return;
     }
 
-    let app = new App(gl);
+    let app = new App(gl, this.state.size, this.state.time_compression);
     app.run();
     this.is_randomise = false;
     this.is_clear = false;
@@ -62,8 +65,14 @@ export class AppView extends React.Component {
   on_mouse_down(ev) {
     this.controller.on_mouse_down(ev);
     switch (ev.button) {
-      case 0: this.is_randomise = true; break;
-      case 2: this.is_clear = true; break;
+      case 0: 
+        this.is_randomise = true; 
+        this.is_clear = false; 
+        break;
+      case 2: 
+        this.is_randomise = false;
+        this.is_clear = true; 
+        break;
     }
   }
 
@@ -92,21 +101,68 @@ export class AppView extends React.Component {
     }
 
     return (
-      <div>
-        <div>
-          <button onClick={ev => this.clear()}>Clear</button>
-          {!this.state.running && <button onClick={ev => this.step()}>Step</button>}
-          <button onClick={ev => this.toggle()}>{this.state.running ? 'Pause' : 'Resume'}</button>
-          <button onClick={ev => this.randomise()}>Randomise</button>
-          <div>Steps: {this.state.steps}</div>
-          <div>Nodes: {this.state.nodes}</div>
+      <div className="container">
+        <div className="fixed">
+          {this.render_controls()}
+          {this.render_settings()}
+          {this.render_stats()}
         </div>
-        <canvas width={1024} height={1024} ref={this.ref}
-                onMouseDown={ev => this.on_mouse_down(ev)}
-                onMouseMove={ev => this.on_mouse_move(ev)}
-                onMouseUp={ev => this.on_mouse_up(ev)}></canvas>
+        <div className="flex-item">
+          <canvas className="view" width={1024} height={1024} ref={this.ref}
+                  onMouseDown={ev => this.on_mouse_down(ev)}
+                  onMouseMove={ev => this.on_mouse_move(ev)}
+                  onMouseUp={ev => this.on_mouse_up(ev)}></canvas>
+        </div>
       </div>
     );
+  }
+
+  render_controls() {
+    return <div>
+      <button onClick={ev => this.clear()}>Clear</button>
+      {!this.state.running && <button onClick={ev => this.step()}>Step</button>}
+      <button onClick={ev => this.toggle()}>{this.state.running ? 'Pause' : 'Resume'}</button>
+      <button onClick={ev => this.randomise()}>Randomise</button>
+    </div>
+  }
+
+  render_stats() {
+    return <div>
+      <h3>Stats</h3>
+      <div>Steps: {this.state.steps}</div>
+      <div>Nodes: {this.state.nodes}</div>
+    </div>
+  }
+
+  render_settings() {
+    let onSubmit = ev => {
+      ev.preventDefault();
+      this.app.update_settings(this.state.size, this.state.time_compression);
+    }
+
+    let onCompression = ev => {
+      this.setState({...this.state, time_compression: ev.target.checked})
+    }
+
+    let onSize = ev => {
+      this.setState({...this.state, size: ev.target.value});
+    }
+
+    return <div>
+      <h3>Settings</h3>
+      <form onSubmit={onSubmit}>
+        <div>
+          <label>Time compression</label>
+          <input type="checkbox" checked={this.state.time_compression} onChange={onCompression}></input>
+        </div>
+        <div>
+          <label>Depth</label>
+          <input type="number" name="quantity" min="2" max="10" value={this.state.size}
+            onChange={onSize}></input>
+        </div>
+        <button type="submit" className="button primary small">Update Settings</button>
+      </form>
+    </div> 
   }
 }
 
@@ -121,12 +177,19 @@ class MouseController {
     this.drag_listeners.add(list);
   }
 
+  get_position(ev) {
+    var rect = ev.target.getBoundingClientRect();
+    var x = ev.clientX - rect.left; //x position within the element.
+    var y = ev.clientY - rect.top;  //y position within the element.
+    return vec2.fromValues(x, y);
+  }
+
   on_mouse_down(ev) {
-    this.drag_start = vec2.fromValues(ev.clientX, ev.clientY);
+    this.drag_start = this.get_position(ev);
   }
 
   on_mouse_up(ev) {
-    this.drag_end = vec2.fromValues(ev.clientX, ev.clientY);
+    this.drag_end = this.get_position(ev);
     for (let list of this.drag_listeners) {
       list({start:this.drag_start, end:this.drag_end});
     }
