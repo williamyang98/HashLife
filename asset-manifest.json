@@ -1,19 +1,22 @@
 {
   "files": {
-    "main.js": "/HashLife/static/js/main.0a609e82.chunk.js",
-    "main.js.map": "/HashLife/static/js/main.0a609e82.chunk.js.map",
+    "main.css": "/HashLife/static/css/main.1580b5a8.chunk.css",
+    "main.js": "/HashLife/static/js/main.f49cdc19.chunk.js",
+    "main.js.map": "/HashLife/static/js/main.f49cdc19.chunk.js.map",
     "runtime-main.js": "/HashLife/static/js/runtime-main.b1636f05.js",
     "runtime-main.js.map": "/HashLife/static/js/runtime-main.b1636f05.js.map",
-    "static/js/2.15efe3d3.chunk.js": "/HashLife/static/js/2.15efe3d3.chunk.js",
-    "static/js/2.15efe3d3.chunk.js.map": "/HashLife/static/js/2.15efe3d3.chunk.js.map",
+    "static/js/2.3543bd1e.chunk.js": "/HashLife/static/js/2.3543bd1e.chunk.js",
+    "static/js/2.3543bd1e.chunk.js.map": "/HashLife/static/js/2.3543bd1e.chunk.js.map",
     "index.html": "/HashLife/index.html",
-    "precache-manifest.b3a54b291d267aed2eab25ae0ad4dce7.js": "/HashLife/precache-manifest.b3a54b291d267aed2eab25ae0ad4dce7.js",
+    "precache-manifest.e7f1cd9fcd891cd8bbae106bb4c6f8f1.js": "/HashLife/precache-manifest.e7f1cd9fcd891cd8bbae106bb4c6f8f1.js",
     "service-worker.js": "/HashLife/service-worker.js",
-    "static/js/2.15efe3d3.chunk.js.LICENSE.txt": "/HashLife/static/js/2.15efe3d3.chunk.js.LICENSE.txt"
+    "static/css/main.1580b5a8.chunk.css.map": "/HashLife/static/css/main.1580b5a8.chunk.css.map",
+    "static/js/2.3543bd1e.chunk.js.LICENSE.txt": "/HashLife/static/js/2.3543bd1e.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.b1636f05.js",
-    "static/js/2.15efe3d3.chunk.js",
-    "static/js/main.0a609e82.chunk.js"
+    "static/js/2.3543bd1e.chunk.js",
+    "static/css/main.1580b5a8.chunk.css",
+    "static/js/main.f49cdc19.chunk.js"
   ]
 }
