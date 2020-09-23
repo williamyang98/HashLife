@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/HashLife/static/css/main.1580b5a8.chunk.css",
-    "main.js": "/HashLife/static/js/main.55b37952.chunk.js",
-    "main.js.map": "/HashLife/static/js/main.55b37952.chunk.js.map",
+    "main.js": "/HashLife/static/js/main.b9773acb.chunk.js",
+    "main.js.map": "/HashLife/static/js/main.b9773acb.chunk.js.map",
     "runtime-main.js": "/HashLife/static/js/runtime-main.b1636f05.js",
     "runtime-main.js.map": "/HashLife/static/js/runtime-main.b1636f05.js.map",
     "static/js/2.f4bf7cd7.chunk.js": "/HashLife/static/js/2.f4bf7cd7.chunk.js",
     "static/js/2.f4bf7cd7.chunk.js.map": "/HashLife/static/js/2.f4bf7cd7.chunk.js.map",
     "index.html": "/HashLife/index.html",
-    "precache-manifest.0c2a1fd3485733aae4db42966bce8769.js": "/HashLife/precache-manifest.0c2a1fd3485733aae4db42966bce8769.js",
+    "precache-manifest.993889d293732e2b743c24219c9a4128.js": "/HashLife/precache-manifest.993889d293732e2b743c24219c9a4128.js",
     "service-worker.js": "/HashLife/service-worker.js",
     "static/css/main.1580b5a8.chunk.css.map": "/HashLife/static/css/main.1580b5a8.chunk.css.map",
     "static/js/2.f4bf7cd7.chunk.js.LICENSE.txt": "/HashLife/static/js/2.f4bf7cd7.chunk.js.LICENSE.txt"
@@ -17,6 +17,6 @@
     "static/js/runtime-main.b1636f05.js",
     "static/js/2.f4bf7cd7.chunk.js",
     "static/css/main.1580b5a8.chunk.css",
-    "static/js/main.55b37952.chunk.js"
+    "static/js/main.b9773acb.chunk.js"
   ]
 }

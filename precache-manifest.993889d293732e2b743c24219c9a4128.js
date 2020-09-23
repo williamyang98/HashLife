@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "0c775f4c14d27f2306e6b124f50f8932",
+    "revision": "30754b5ae233f71d14f3922c4a1ff2de",
     "url": "/HashLife/index.html"
   },
   {
-    "revision": "acb19809ba7ac99d9bce",
+    "revision": "d3a4282449830c72500c",
     "url": "/HashLife/static/css/main.1580b5a8.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/HashLife/static/js/2.f4bf7cd7.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "acb19809ba7ac99d9bce",
-    "url": "/HashLife/static/js/main.55b37952.chunk.js"
+    "revision": "d3a4282449830c72500c",
+    "url": "/HashLife/static/js/main.b9773acb.chunk.js"
   },
   {
     "revision": "7e6a4941fd68b5ec63ba",
