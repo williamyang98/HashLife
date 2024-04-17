@@ -1,5 +1,5 @@
 # HashLife
-Implementation of hashlife. [Check it out](https://fiendchain.github.io/HashLife)
+Implementation of hashlife. [Check it out](https://williamyang98.github.io/HashLife)
 
 ## Explanation
 Implementation was heavily based on article written by Dr Dobb over [here](https://www.drdobbs.com/jvm/an-algorithm-for-compressing-space-and-t/184406478?pgno=1). Check that link for a detailed explanation.
